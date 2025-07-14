@@ -21,11 +21,8 @@ exports.register = async (req, res) => {
       password
     });
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
-
-    // Save user to database
     await user.save();
 
     // Create JWT payload
@@ -54,20 +51,14 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-
-    // Verify password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-
-    // Create JWT payload
     const payload = {
       user: {
         id: user.id
@@ -92,7 +83,6 @@ exports.login = async (req, res) => {
 
 exports.getMe = async (req, res) => {
   try {
-    // Get user data without password
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
   } catch (error) {
